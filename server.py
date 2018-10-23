@@ -16,6 +16,7 @@
 __package__ = "baseserver"
 
 import socket
+import sys
 import thread
 import time
 
@@ -31,8 +32,8 @@ class BaseServer(socket.socket, threaded.Threaded):
     
     def __init__(self, event_class = events.DummyEvent,
             event_handler_class = eventhandler.DummyHandler,
-            address = None, backlog = 100, buflen = 512, nthreads = -1,
-            socket_event_function_name = None, timeout = 0.001,
+            address = None, backlog = 100, buflen = 512, name = "base",
+            nthreads = -1, socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
         if not address: # determine the best default address
             address = ("", 1080)
@@ -49,13 +50,16 @@ class BaseServer(socket.socket, threaded.Threaded):
         socket.socket.__init__(self, af, type)
         threaded.Threaded.__init__(self, nthreads)
         self.address = address
+        self.af = af
         self.alive = threaded.Synchronized(True)
         self.backlog = backlog
         self.buflen = buflen
-        self.conn_sleep = conn_sleep
+        self.event_class = event_class
         self.event_handler_class = event_handler_class
+        self.name = name
         self.sleep = 1.0 / self.backlog # optimal value
         self.bind(self.address)
+        self.print_lock = thread.allocate_lock()
         self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.settimeout(timeout)
@@ -63,7 +67,8 @@ class BaseServer(socket.socket, threaded.Threaded):
         self.timeout = timeout
 
     def __call__(self):
-        self.listen(self.backlog)
+        self.sprint("Started", self.name, "server on",
+            straddress.straddress(self.address))
         
         try:
             for event in self:
@@ -71,8 +76,13 @@ class BaseServer(socket.socket, threaded.Threaded):
         except KeyboardInterrupt:
             self.alive.set(False)
         finally:
+            self.sprint("Closing", self.name, "server on %s..."
+                % straddress.straddress(self.address))
             self.shutdown(socket.SHUT_RDWR)
             self.close()
+
+    def __iter__(self):
+        return self
 
     def next(self):
         """generate events"""
@@ -82,25 +92,63 @@ class BaseServer(socket.socket, threaded.Threaded):
             
             try:
                 return self.event_class(*getattr(self,
-                    self.socket_event_function_name))
+                    self.socket_event_function_name)())
             except socket.error:
                 pass
             time.sleep(self.sleep)
+
+    def fsprint(self, fp, *args):
+        """synchronized print to file"""
+        with self.print_lock:
+            for e in args:
+                print >> fp, e,
+            print >> fp
+    
+    def sprint(self, *args):
+        """synchronized print"""
+        self.fsprint(sys.stdout, *args)
+
+class BaseIterativeServer(BaseServer, threaded.Iterative):
+    """
+    a server which iterates through tasks
+
+    tough to directly subclass, but easy to mimic
+    """
+    
+    def __init__(self, *args, **kwargs):
+        BaseServer.__init__(self, *args, **kwargs)
+        threaded.Iterative.__init__(self, self.nthreads)
 
 class BaseTCPServer(BaseServer):
     def __init__(self, event_class = events.ConnectionEvent,
             event_handler_class = eventhandler.ConnectionHandler,
             address = None, backlog = 100, buflen = 65536,
-            conn_inactive = None, conn_sleep = 0.001, nthreads = -1,
-            timeout = 0.001):
+            conn_inactive = None, conn_sleep = 0.001, name = "base TCP",
+            nthreads = -1, timeout = 0.001):
         BaseServer.__init__(self, event_class, event_handler_class, address,
-            backlog, buflen, nthreads, "accept", timeout)
+            backlog, buflen, name, nthreads, "accept", timeout,
+            socket.SOCK_STREAM)
         self.conn_inactive = conn_inactive # inactivity period before cleanup
         self.conn_sleep = conn_sleep
+
+    def __call__(self):
+        self.listen(self.backlog)
+        BaseServer.__call__(self)
+
+class BaseIterativeTCPServer(BaseTCPServer, threaded.Iterative):
+    def __init__(self, *args, **kwargs):
+        BaseTCPServer.__init__(self, *args, **kwargs)
+        threaded.Iterative.__init__(self, self.nthreads)
 
 class BaseUDPServer(BaseServer):
     def __init__(self, event_class = events.DatagramEvent,
             event_handler_class = eventhandler.DatagramHandler, address = None,
-            backlog = 100, buflen = 512, nthreads = -1, timeout = 0.001):
+            backlog = 100, buflen = 512, name = "base UDP", nthreads = -1,
+            timeout = 0.001):
         BaseServer.__init__(self, event_class, event_handler_class, address,
-            backlog, buflen, nthreads, "recvfrom", timeout)
+            backlog, buflen, name, nthreads, "recvfrom", timeout)
+
+class BaseIterativeUDPServer(BaseUDServer, threaded.Iterative):
+    def __init__(self, *args, **kwargs):
+        BaseUDPServer.__init__(self, *args, **kwargs)
+        threaded.Iterative.__init__(self, self.nthreads)

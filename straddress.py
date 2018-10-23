@@ -15,9 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __package__ = "baseserver"
 
+import socket
+
 __doc__ = "address strings"
 
-def parse_sockaddr(sockaddr, af = None):
+def parseaddress(sockaddr, af = None):
     """
     parse a socket address string
 
@@ -46,7 +48,7 @@ def parse_sockaddr(sockaddr, af = None):
         raise ValueError("invalid socket address string")
     return tuple(parsed)
 
-def str_addr(addr, af = None):
+def straddress(addr, af = None):
     """
     convert an address to  string
 

@@ -18,7 +18,8 @@ __package__ = "baseserver"
 __doc__ = "events"
 
 class Event:
-    pass
+    def __init__(self):
+        pass
 
 class ServerEvent(Event):
     def __init__(self, server):

@@ -55,8 +55,7 @@ class BaseServer(socket.socket, threaded.Threaded):
         self.backlog = backlog
         self.buflen = buflen
         self.event_class = event_class
-        self.event_handler_class = lambda e: eventhandler.PipeliningHandler(
-            event_handler_class(e)) # wrap with pipelining functionality
+        self.event_handler_class = event_handler_class
         self.name = name
         self.sleep = 1.0 / self.backlog # optimal value
         self.bind(address)

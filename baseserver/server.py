@@ -40,12 +40,8 @@ class BaseServer(socket.socket, threaded.Threaded):
             address = None, backlog = 100, buflen = 512, name = "base",
             nthreads = -1, socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
-        if not address: # determine the best default address
-            address = ("", 0)
-
-            for addrinfo in socket.getaddrinfo(None, 0):
-                address = addrinfo[4]
-                break
+        if not address: # use the best default address
+            address = best_address()
         af = socket.AF_INET # determine the address family
 
         if len(address) == 4:

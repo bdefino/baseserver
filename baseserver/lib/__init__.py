@@ -15,19 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __package__ = "baseserver"
 
-__doc__ = "steppable execution via generators"
+import threaded
 
-class Steppable:
-    def __init__(self):
-        pass
-
-    def __call__(self):
-        """execute all the steps"""
-        for step in self:
-            pass
-
-    def __iter__(self):
-        return self
-    
-    def next(self):
-        raise StopIteration()
+__doc__ = "baseserver library"

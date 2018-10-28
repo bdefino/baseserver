@@ -16,12 +16,13 @@
 __package__ = "baseserver"
 
 import os
+import sys
 
-import steppable
+from lib import threaded
 
 __doc__ = "event handling framework"
 
-class EventHandler(steppable.Steppable):
+class EventHandler(threaded.IterativeTask):
     """
     the base class for an event handler
 
@@ -46,14 +47,14 @@ class DummyHandler(EventHandler):
 class ForkingEventHandler(EventHandler):
     """
     forks when executing __call__,
-    but also allows steppability in the current process
+    but also preserves steppability within the resulting process
     """
     
     def __init__(self, *args, **kwargs):
         EventHandler.__init__(self, *args, **kwargs)
         self.pid = None
 
-    def __call__(self):
+    def __call__(self, kill_parent = False):
         """fork before execution"""
         if self.pid == None:
             self.pid = os.fork()
@@ -61,17 +62,7 @@ class ForkingEventHandler(EventHandler):
             if self.pid < 0:
                 raise OSError("unable to fork")
             elif self.pid > 0:
+                if kill_parent:
+                    sys.exit(0)
                 return
-        steppable.Steppable.__call__(self)
-
-class PipeliningHandler(EventHandler):
-    """pipelines events within a threaded instance"""
-    
-    def __init__(self, handler):
-        eventhandler.EventHandler.__init__(self, handler.event, handler.parent)
-        self.handler = handler
-    
-    def next(self):
-        self.handler.next() # this may stop the iteration
-        self.parent.execute(self.handler.next)
-        raise StopIteration()
+        threaded.IterativeTask.__call__(self)

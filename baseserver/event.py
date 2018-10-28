@@ -21,6 +21,11 @@ class Event:
     def __init__(self, parent = None):
         self.parent = parent
 
+class ServerEvent(Event):
+    def __init__(self, server, *args, **kwargs):
+        Event.__init__(self, *args, **kwargs)
+        self.server = server
+
 class ConnectionEvent(ServerEvent):
     def __init__(self, conn, remote, *args, **kwargs):
         ServerEvent.__init__(self, *args, **kwargs)
@@ -33,7 +38,7 @@ class DatagramEvent(ServerEvent):
         self.datagram = datagram
         self.remote = remote
 
-class DummyEvent(ServerEvent):
+class DummyServerEvent(ServerEvent):
     def __init__(self, event, remote, *args, **kwargs):
         ServerEvent.__init__(self, *args, **kwargs)
         self.event = event
@@ -42,8 +47,3 @@ class ThreadedEvent(Event):
     def __init__(self, *args, **kwargs):
         Event.__init__(self, *args, **kwargs)
         self.threaded = self.parent
-
-class PipeliningEvent(ThreadedEvent):
-    def __init__(self, steppable, *args, **kwargs):
-        ThreadedEvent.__init__(self, *args, **kwargs)
-        self.steppable = steppable

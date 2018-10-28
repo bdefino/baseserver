@@ -29,9 +29,10 @@ class EventHandler(steppable.Steppable):
     when stepping isn't necessary
     """
     
-    def __init__(self, event):
+    def __init__(self, event, parent = None):
         steppable.Steppable.__init__(self)
         self.event = event
+        self.parent = parent
 
 class ConnectionHandler(EventHandler):
     pass
@@ -48,8 +49,8 @@ class ForkingEventHandler(EventHandler):
     but also allows steppability in the current process
     """
     
-    def __init__(self, event):
-        EventHandler.__init__(self, event)
+    def __init__(self, *args, **kwargs):
+        EventHandler.__init__(self, *args, **kwargs)
         self.pid = None
 
     def __call__(self):
@@ -66,10 +67,11 @@ class ForkingEventHandler(EventHandler):
 class PipeliningHandler(EventHandler):
     """pipelines events within a threaded instance"""
     
-    def __init__(self, event):
-        eventhandler.EventHandler.__init__(self, event)
+    def __init__(self, handler):
+        eventhandler.EventHandler.__init__(self, handler.event, handler.parent)
+        self.handler = handler
     
     def next(self):
-        self.event.steppable.next() # this may stop the iteration
-        self.event.threaded.execute(self.event.steppable.next)
+        self.handler.next() # this may stop the iteration
+        self.parent.execute(self.handler.next)
         raise StopIteration()

@@ -18,37 +18,32 @@ __package__ = "baseserver"
 __doc__ = "events"
 
 class Event:
-    def __init__(self):
-        pass
-
-class ServerEvent(Event):
-    def __init__(self, server):
-        Event.__init__(self)
-        self.server = server
+    def __init__(self, parent = None):
+        self.parent = parent
 
 class ConnectionEvent(ServerEvent):
-    def __init__(self, conn, remote, server):
-        ServerEvent.__init__(self, server)
+    def __init__(self, conn, remote, *args, **kwargs):
+        ServerEvent.__init__(self, *args, **kwargs)
         self.conn = conn
         self.remote = remote
 
 class DatagramEvent(ServerEvent):
-    def __init__(self, datagram, remote, server):
-        ServerEvent.__init__(self, server)
+    def __init__(self, datagram, remote, *args, **kwargs):
+        ServerEvent.__init__(self, *args, **kwargs)
         self.datagram = datagram
         self.remote = remote
 
 class DummyEvent(ServerEvent):
-    def __init__(self, event, remote, server):
-        ServerEvent.__init__(self, server)
+    def __init__(self, event, remote, *args, **kwargs):
+        ServerEvent.__init__(self, *args, **kwargs)
         self.event = event
 
 class ThreadedEvent(Event):
-    def __init__(self, threaded):
-        Event.__init__(self)
-        self.threaded = threaded
+    def __init__(self, *args, **kwargs):
+        Event.__init__(self, *args, **kwargs)
+        self.threaded = self.parent
 
-class SteppableEvent(ThreadedEvent):
-    def __init__(self, steppable, threaded):
-        ThreadedEvent.__init__(self, threaded)
+class PipeliningEvent(ThreadedEvent):
+    def __init__(self, steppable, *args, **kwargs):
+        ThreadedEvent.__init__(self, *args, **kwargs)
         self.steppable = steppable

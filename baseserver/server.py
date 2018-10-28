@@ -13,8 +13,6 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-__package__ = "baseserver"
-
 import socket
 import sys
 import thread
@@ -22,10 +20,16 @@ import time
 
 import event
 import eventhandler
+from lib import threaded
 import straddress
-import threaded
 
 __doc__ = "server core implementation"
+
+def best_address(port = 0):
+    """return the best default address"""
+    for addrinfo in socket.getaddrinfo(None, port):
+        return addrinfo[4]
+    return ("", port)
 
 class BaseServer(socket.socket, threaded.Threaded):
     """base class for an interruptible server socket"""
@@ -124,7 +128,7 @@ class BaseIterativeServer(BaseServer, threaded.Iterative):
             name = "base iterative", nthreads = -1,
             socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
-        BaseServer.__init__(self, address, backlog, buflen, event_class
+        BaseServer.__init__(self, address, backlog, buflen, event_class,
             event_handler_class, name, nthreads, socket_event_function_name,
             threaded.Iterative, timeout, type)
 

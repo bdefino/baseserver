@@ -62,3 +62,14 @@ class ForkingEventHandler(EventHandler):
             elif self.pid > 0:
                 return
         steppable.Steppable.__call__(self)
+
+class PipeliningHandler(eventhandler.EventHandler):
+    """pipelines events within a threaded instance"""
+    
+    def __init__(self, event):
+        eventhandler.EventHandler.__init__(self, event)
+    
+    def next(self):
+        self.event.steppable.next() # this may stop the iteration
+        self.event.threaded.execute(self.event.steppable.next)
+        raise StopIteration()

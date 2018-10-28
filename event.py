@@ -42,3 +42,13 @@ class DummyEvent(ServerEvent):
     def __init__(self, event, remote, server):
         ServerEvent.__init__(self, server)
         self.event = event
+
+class ThreadedEvent(Event):
+    def __init__(self, threaded):
+        Event.__init__(self)
+        self.threaded = threaded
+
+class SteppableEvent(ThreadedEvent):
+    def __init__(self, steppable, threaded):
+        ThreadedEvent.__init__(self, threaded)
+        self.steppable = steppable

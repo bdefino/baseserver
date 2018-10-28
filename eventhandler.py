@@ -63,7 +63,7 @@ class ForkingEventHandler(EventHandler):
                 return
         steppable.Steppable.__call__(self)
 
-class PipeliningHandler(eventhandler.EventHandler):
+class PipeliningHandler(EventHandler):
     """pipelines events within a threaded instance"""
     
     def __init__(self, event):

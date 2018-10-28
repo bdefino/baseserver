@@ -34,11 +34,11 @@ def best_address(port = 0):
 class BaseServer(socket.socket, threaded.Threaded):
     """base class for an interruptible server socket"""
     
-    def __init__(self, threaded_class = threaded.Threaded,
+    def __init__(self, address = None, backlog = 100, buflen = 512,
             event_class = event.DummyServerEvent,
-            event_handler_class = eventhandler.DummyHandler,
-            address = None, backlog = 100, buflen = 512, name = "base",
-            nthreads = -1, socket_event_function_name = None, timeout = 0.001,
+            event_handler_class = eventhandler.DummyHandler, name = "base",
+            nthreads = -1, socket_event_function_name = None,
+            threaded_class = threaded.Threaded, timeout = 0.001,
             type = socket.SOCK_DGRAM):
         if not address: # use the best default address
             address = best_address()

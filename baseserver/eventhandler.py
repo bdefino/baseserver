@@ -24,12 +24,12 @@ class EventHandler(threaded.IterableTask):
     """
     the base class for an event handler
 
-    this SHOULD be steppable, though overriding __call__ is acceptable
+    this SHOULD be iterable, though overriding __call__ is acceptable
     when stepping isn't necessary
     """
     
     def __init__(self, event, parent = None):
-        steppable.Steppable.__init__(self)
+        threaded.IterableTask.__init__(self)
         self.event = event
         self.parent = parent
 

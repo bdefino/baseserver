@@ -43,9 +43,9 @@ class BaseServer(socket.socket):
     """
     
     def __init__(self, address = None, backlog = 100, buflen = 512,
-            callback = lambda e: None, event_class = event.DummyServerEvent,
-            event_handler_class = eventhandler.DummyHandler,
-            name = "base", socket_event_function_name = None, timeout = 0.001,
+            callback = lambda e: e(), event_class = event.DummyServerEvent,
+            event_handler_class = eventhandler.DummyHandler, name = "base",
+            socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
         if not address: # use the best default address
             address = best_address()
@@ -208,8 +208,8 @@ class BasePipeliningUDPServer(BasePipeliningServer):
 
 class BaseTCPServer(BaseServer):
     def __init__(self, address = None, backlog = 100, buflen = 65536,
-            callback = lambda e: None, conn_inactive = None,
-            conn_sleep = 0.001, event_class = event.ConnectionEvent,
+            callback = lambda e: e(), conn_inactive = None, conn_sleep = 0.001,
+            event_class = event.ConnectionEvent,
             event_handler_class = eventhandler.ConnectionHandler,
             name = "base TCP", timeout = 0.001):
         BaseServer.__init__(self, address, backlog, buflen, callback,
@@ -262,9 +262,8 @@ class BaseThreadedUDPServer(BaseThreadedServer):
             "recvfrom", timeout)
 
 class BaseUDPServer(BaseServer):
-    def __init__(self, address = None,
-            backlog = 100, buflen = 512, callback = lambda e: None,
-            event_class = event.DatagramEvent,
+    def __init__(self, address = None, backlog = 100, buflen = 512,
+            callback = lambda e: e(), event_class = event.DatagramEvent,
             event_handler_class = eventhandler.DatagramHandler,
             name = "base UDP", timeout = 0.001):
         BaseServer.__init__(self, address, backlog, buflen, callback,

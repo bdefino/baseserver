@@ -32,10 +32,19 @@ def best_address(port = 0):
     return ("", port)
 
 class BaseServer(socket.socket):
-    """base class for an interruptible server socket"""
+    """
+    base class for an interruptible server socket
+    
+    this processes events like so:
+        callback(event_handler_class(event_class(event)))
+    separating the callback and event handler allows support for both
+    functional and object-oriented styles, as well as providing easy
+    integration of parallelization
+    """
     
     def __init__(self, address = None, backlog = 100, buflen = 512,
             callback = lambda e: None, event_class = event.DummyServerEvent,
+            event_handler_class = eventhandler.DummyHandler,
             name = "base", socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
         if not address: # use the best default address
@@ -48,11 +57,17 @@ class BaseServer(socket.socket):
             raise ValueError("unknown address family")
         socket.socket.__init__(self, af, type)
         self.af = af
-        self.alive = threaded.Synchronized(True)
+
+        if not hasattr(self, "alive"):
+            self.alive = threaded.Synchronized(True)
+        elif not isinstance(getattr(self, "alive"), threaded.Synchronized):
+            raise TypeError("conflicting types for \"alive\":" \
+                " multiple inheritance issue?")
         self.backlog = backlog
         self.buflen = buflen
         self.callback = callback
         self.event_class = event_class
+        self.event_handler_class = event_handler_class
         self.name = name
         self.sleep = 1.0 / self.backlog # optimal value
         self.bind(address)
@@ -72,7 +87,7 @@ class BaseServer(socket.socket):
             if max_events:
                 for event in self:
                     max_events -= 1
-                    self.callback(event)
+                    self.callback(self.event_handler_class(event))
 
                     if not max_events:
                         break
@@ -115,7 +130,7 @@ class BaseServer(socket.socket):
 class BaseIterativeServer(BaseServer, threaded.Iterative):
     def __init__(self, address = None, backlog = 100, buflen = 512,
             event_class = event.DummyServerEvent,
-            event_handler_class = eventhandler.DummyEventHandler,
+            event_handler_class = eventhandler.DummyHandler,
             name = "base iterative", nthreads = -1, queue_output = False,
             socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
@@ -154,7 +169,7 @@ class BaseIterativeUDPServer(BaseIterativeServer):
 class BasePipeliningServer(BaseServer, threaded.Pipelining):
     def __init__(self, address = None, backlog = 100, buflen = 512,
             event_class = event.DummyServerEvent,
-            event_handler_class = eventhandler.DummyEventHandler,
+            event_handler_class = eventhandler.DummyHandler,
             name = "base pipelining", nthreads = -1, queue_output = False,
             socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):
@@ -210,7 +225,7 @@ class BaseTCPServer(BaseServer):
 class BaseThreadedServer(BaseServer, threaded.Threaded):
     def __init__(self, address = None, backlog = 100, buflen = 512,
             event_class = event.DummyServerEvent,
-            event_handler_class = eventhandler.DummyEventHandler,
+            event_handler_class = eventhandler.DummyHandler,
             name = "base threaded", nthreads = -1, queue_output = False,
             socket_event_function_name = None, timeout = 0.001,
             type = socket.SOCK_DGRAM):

@@ -279,3 +279,12 @@ class BaseUDPServer(BaseServer):
         BaseServer.__init__(self, address, backlog, buflen, callback,
             event_class, event_handler_class, name, "recvfrom", stderr, stdout,
             timeout)
+
+class ServerWrapper:
+    def __init__(self, _class, *args, **kwargs):
+        self._server = _class(*args, **kwargs)
+
+    def __getattr__(self, key):
+        if not key == "_server":
+            return getattr(self._server, key)
+        return self._server

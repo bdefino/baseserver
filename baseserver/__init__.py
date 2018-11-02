@@ -20,7 +20,8 @@ import eventhandler
 from lib import threaded
 from server import BaseServer
 from server import best_address
-import straddr
+from straddr import parseaddr
+from straddr import straddr
 
 __doc__ = """
 a simple server framework

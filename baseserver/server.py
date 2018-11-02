@@ -280,10 +280,16 @@ class BaseUDPServer(BaseServer):
             event_class, event_handler_class, name, "recvfrom", stderr, stdout,
             timeout)
 
-class ServerWrapper:
+class ServerFactory:
+    """
+    factory class for a server
+    
+    this simply wraps the object
+    """
+    
     def __init__(self, _class, *args, **kwargs):
         self._server = _class(*args, **kwargs)
-
+    
     def __getattr__(self, key):
         if not key == "_server":
             return getattr(self._server, key)

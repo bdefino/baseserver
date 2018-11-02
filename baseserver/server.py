@@ -284,7 +284,9 @@ class ServerFactory:
     """
     factory class for a server
     
-    this simply wraps the object
+    this simply wraps the object,
+    and facilitates faux subclassing in order to both slim down code
+    and centralize server creation, regardless of its base class
     """
     
     def __init__(self, _class, *args, **kwargs):

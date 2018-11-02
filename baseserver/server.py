@@ -70,43 +70,39 @@ class BaseServer(socket.socket):
             for k in defaults: # fill in missing values
                 if not k in kwargs:
                     kwargs[k] = defaults[k]
-        af = socket.AF_INET # determine address family
         
-        if len(kwargs["address"]) == 4:
-            af = socket.AF_INET6
-        elif not len(kwargs["address"]) == 2:
+        if len(kwargs["address"]) == 2: # determine address family
+            kwargs["af"] = socket.AF_INET
+        elif len(kwargs["address"]) == 4:
+            kwargs["af"] = socket.AF_INET6
+        else:
             raise ValueError("unknown address family")
-        
-        socket.socket.__init__(self, af, type)
-        self.af = af
+        socket.socket.__init__(self, kwargs["af"], type)
+
+        for k in kwargs:
+            setattr(self, k, kwargs[k])
         
         if not hasattr(self, "alive"):
             self.alive = threaded.Synchronized(True)
         elif not isinstance(getattr(self, "alive"), threaded.Synchronized):
             raise TypeError("conflicting types for \"alive\":" \
                 " multiple inheritance?")
-        self.backlog = kwargs["backlog"]
-        self.buflen = kwargs["buflen"]
         self.callback = callback
-        self.event_class = kwargs["event_class"]
-        self.event_handler_class = kwargs["event_handler_class"]
         self.name = name
         self.sleep = 1.0 / self.backlog # optimal value
-        self.bind(kwargs["address"])
+        self.bind(self.address)
         self.address = self.getsockname() # by default, address is undefined
         self.print_lock = thread.allocate_lock()
         self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        self.settimeout(kwargs["timeout"])
+        self.settimeout(self.timeout)
         
-        if not kwargs["socket_event_function_name"] \
-                or not hasattr(self, kwargs["socket_event_function_name"]):
+        if not self.socket_event_function_name \
+                or not hasattr(self, self.socket_event_function_name):
             raise ValueError("socket_event_function_name must be a socket" \
                 " function")
-        self.socket_event_function_name = kwargs["socket_event_function_name"]
         self.stderr = stderr
         self.stdout = stdout
-        self.timeout = kwargs["timeout"]
     
     def __call__(self, max_events = -1):
         if self.type == socket.SOCK_STREAM:

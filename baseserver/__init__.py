@@ -19,7 +19,7 @@ from event import ConnectionEvent, Event, DatagramEvent, DummyServerEvent,  \
     ServerEvent, ThreadedEvent
 from eventhandler import ConnectionHandler, DatagramHandler, DummyHandler, \
     EventHandler, ForkingConnectionHandler, ForkingDatagramHandler, \
-    ForkingDummyHandler, ForkingHandler
+    ForkingDummyHandler, ForkingEventHandler
 from lib import threaded
 from server import BaseServer, best_address
 from straddr import parseaddr, straddr

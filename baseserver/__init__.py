@@ -18,7 +18,8 @@ __package__ = __name__
 import event
 import eventhandler
 from lib import threaded
-import server
+from server import BaseServer
+from server import best_address
 import straddr
 
 __doc__ = """

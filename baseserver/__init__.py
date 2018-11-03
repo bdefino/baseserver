@@ -15,14 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __package__ = __name__
 
-from event import ConnectionEvent, Event, DatagramEvent, DummyServerEvent,  \
-    ServerEvent, ThreadedEvent
-from eventhandler import ConnectionHandler, DatagramHandler, DummyHandler, \
-    EventHandler, ForkingConnectionHandler, ForkingDatagramHandler, \
-    ForkingDummyHandler, ForkingEventHandler
+import basehttpserver
+import baseserver
+import event
+import eventhandler
 from lib import threaded
-from server import BaseServer, best_address
-from straddr import parseaddr, straddr
+import straddr
 
 __doc__ = """
 a simple server framework

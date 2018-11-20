@@ -133,10 +133,11 @@ class BaseServer(socket.socket):
         """
         self.alive.set(False)
         
-        if self.threaded and hasattr(self.threaded, "kill_all"):
-            self.threaded.kill_all()
-        self.shutdown(socket.SHUT_RDWR)
-        self.close()
+        if cleanup:
+            if self.threaded and hasattr(self.threaded, "kill_all"):
+                self.threaded.kill_all()
+            self.shutdown(socket.SHUT_RDWR)
+            self.close()
 
     def __iter__(self):
         return self

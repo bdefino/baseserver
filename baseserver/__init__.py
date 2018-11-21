@@ -13,22 +13,12 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-__package__ = __name__
-
-import basehttpserver
+import addr
+from addr import atos, best, stoa
 import baseserver
+from baseserver import BaseServer, SocketConfig, TCPConfig, UDPConfig
 import event
-import eventhandler
-from lib import threaded
-import straddr
+from event import Event, ConnectionEvent, DatagramEvent, Handler, \
+     IterableHandler, ServerEvent
 
-__doc__ = """
-a simple server framework
-
-basic flow:
-    1. if there's a kill order, stop
-    2. listen for an event
-    3. create a handler for the event
-    4. pass the handler to the callback
-    5. repeat from step 1
-"""
+__doc__ = "a simple server framework"

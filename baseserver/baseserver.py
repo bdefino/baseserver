@@ -65,7 +65,7 @@ class BaseServer:
 
     def __init__(self, event_class = None, handler_class = None,
             sock_config = SocketConfig, stderr = sys.stderr, stdout = sys.stdout):
-        if not isinstance(sock_config, SocketConfig):
+        if not isinstance(sock_config(), SocketConfig):
             raise TypeError("sock_config must inherit from SocketConfig")
         af = socket.AF_INET
 
@@ -194,9 +194,7 @@ class BaseServer:
 def BaseTCPServer(handler_class = None, sock_config = TCPConfig, *args,
         **kwargs):
     """factory function for a TCP server"""
-    if not sock_config:
-        sock_config = TCPSockConfig()
-    elif not isinstance(sock_config, TCPConfig):
+    if not isinstance(sock_config(), TCPConfig):
         raise TypeError("sock_config must inherit from TCPConfig")
     return BaseServer(event.ConnectionEvent, handler_class, sock_config,
         *args, **kwargs)
@@ -204,9 +202,7 @@ def BaseTCPServer(handler_class = None, sock_config = TCPConfig, *args,
 def BaseUDPServer(handler_class = None, sock_config = UDPConfig, *args,
         **kwargs):
     """factory function for a UDP server"""
-    if not sock_config:
-        sock_config = UDPSockConfig()
-    elif not isinstance(sock_config, UDPConfig):
+    if not isinstance(sock_config(), UDPConfig):
         raise TypeError("sock_config must inherit from UDPConfig")
     return BaseServer(event.DatagramEvent, handler_class, sock_config,
         *args, **kwargs)

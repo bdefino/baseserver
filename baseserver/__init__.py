@@ -26,6 +26,7 @@ from baseserver import BaseServer, SocketConfig, TCPConfig, UDPConfig
 import event
 from event import Event, ConnectionEvent, DatagramEvent, Handler, \
     IterableHandler, ServerEvent
+from lib import threaded
 
 __doc__ = """
 a simple event-based server framework

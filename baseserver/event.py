@@ -49,7 +49,7 @@ class ConnectionEvent(ServerEvent):
         self.remote = remote
 
     def __str__(self):
-        return "connection from %s" % ServerEvent.__str__(self)
+        return "Connection from %s" % ServerEvent.__str__(self)
 
 class DatagramEvent(ServerEvent):
     def __init__(self, datagram, remote, server):

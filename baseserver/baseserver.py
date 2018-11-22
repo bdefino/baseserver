@@ -17,6 +17,7 @@ import socket
 import sys
 import thread
 import time
+import traceback
 
 import addr
 import event
@@ -77,7 +78,7 @@ class BaseServer:
                 backlog = getattr(self.sock_config, "BACKLOG")
             self._sock.listen(backlog)
         self.sprint(self.PREFIX,
-            "starting server on %s" % addr.atos(self.sock_config.ADDRESS))
+            "Serving on %s" % addr.atos(self.sock_config.ADDRESS))
         
         try:
             while self.alive.get():
@@ -98,12 +99,13 @@ class BaseServer:
                     try:
                         handle()
                     except Exception as e:
-                        self.sprinte(self.ERROR_PREFIX, e)
+                        self.sprinte(self.ERROR_PREFIX, event,
+                            traceback.format_exc(e))
         except KeyboardInterrupt:
             pass
         finally:
             self.sprint(self.PREFIX,
-                "closing server on %s" % addr.atos(self.sock_config.ADDRESS))
+                "Closing server on %s" % addr.atos(self.sock_config.ADDRESS))
             self.cleanup()
 
     def cleanup(self):
@@ -167,6 +169,24 @@ class BaseServer:
         """thread future events"""
         if _threaded:
             setattr(self, "_threaded", _threaded)
+
+def BaseTCPServer(handler_class = None, sock_config = None, *args, **kwargs):
+    """factory function for a TCP server"""
+    if not sock_config:
+        sock_config = TCPSockConfig()
+    elif not isinstance(sock_config, TCPConfig):
+        raise TypeError("sock_config must be a TCPConfig instance")
+    return BaseServer(event.ConnectionEvent, handler_class, sock_config,
+        *args, **kwargs)
+
+def BaseUDPServer(handler_class = None, sock_config = None, *args, **kwargs):
+    """factory function for a UDP server"""
+    if not sock_config:
+        sock_config = UDPSockConfig()
+    elif not isinstance(sock_config, UDPConfig):
+        raise TypeError("sock_config must be a UDPConfig instance")
+    return BaseServer(event.DatagramEvent, handler_class, sock_config,
+        *args, **kwargs)
 
 class SocketConfig:
     ADDRESS = addr.best()

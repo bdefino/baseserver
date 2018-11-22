@@ -13,12 +13,23 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+__package__ = __name__
+
 import addr
 from addr import atos, best, stoa
+import basehttpserver
+from basehttpserver import BaseHTTPServer, GETHandler, HEADHandler, \
+    http_bufsize, HTTPConnectionHandler, HTTPHeaders, HTTPRequest, \
+    HTTPRequestEvent, HTTPRequestHandler
 import baseserver
 from baseserver import BaseServer, SocketConfig, TCPConfig, UDPConfig
 import event
 from event import Event, ConnectionEvent, DatagramEvent, Handler, \
-     IterableHandler, ServerEvent
+    IterableHandler, ServerEvent
 
-__doc__ = "a simple server framework"
+__doc__ = """
+a simple event-based server framework
+
+see BaseHTTPServer (basehttpserver.BaseHTTPServer)
+for an example implementation
+"""
